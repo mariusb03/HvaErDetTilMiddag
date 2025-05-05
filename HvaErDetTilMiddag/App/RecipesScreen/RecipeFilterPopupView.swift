@@ -1,3 +1,12 @@
+//
+//  RecipeFilterPopupView.swift
+//  HvaErDetTilMiddag
+//
+//  Created by Marius Bringsvor Rusten on 05/05/2025.
+//
+
+import SwiftUI
+
 struct RecipeFilterPopupView: View {
     var onClose: () -> Void
 

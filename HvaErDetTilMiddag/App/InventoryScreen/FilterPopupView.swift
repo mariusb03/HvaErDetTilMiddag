@@ -1,3 +1,11 @@
+//
+//  FilterPopupView.swift
+//  HvaErDetTilMiddag
+//
+//  Created by Marius Bringsvor Rusten on 04/05/2025.
+//
+
+
 import SwiftUI
 
 struct FilterPopupView: View {

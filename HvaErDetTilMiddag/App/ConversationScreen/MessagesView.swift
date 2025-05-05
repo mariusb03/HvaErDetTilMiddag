@@ -1,3 +1,11 @@
+//
+//  MessagesView.swift
+//  HvaErDetTilMiddag
+//
+//  Created by Marius Bringsvor Rusten on 22/04/2025.
+//
+
+
 import SwiftUI
 
 struct MessagesView: View {

@@ -1,102 +1,190 @@
+//
+//  AddIngredientPopupView.swift
+//  HvaErDetTilMiddag
+//
+//  Created by Marius Bringsvor Rusten on 04/05/2025.
+//
+
 import SwiftUI
 
 struct AddIngredientPopupView: View {
     @Binding var ingredients: [Ingredient]
     var onSave: () -> Void
     var onClose: () -> Void
+    var editingIngredient: Ingredient?
 
-    @State private var name = ""
-    @State private var quantity = ""
-    @State private var unit = "stk"
-    @State private var category = "Grønnsaker"
-    @State private var expirationDate = Date()
+    @State private var name: String
+    @State private var quantity: String
+    @State private var unit: String
+    @State private var category: String
+    @State private var expirationDate: Date
+    @State private var notes: String
 
     let categories = ["Grønnsaker", "Frukt", "Meieri", "Kjøtt", "Fisk", "Pålegg", "Bakst", "Annet"]
     let units = ["stk", "g", "kg", "ml", "l", "ts", "ss", "pk"]
 
+    init(
+        ingredients: Binding<[Ingredient]>,
+        onSave: @escaping () -> Void,
+        onClose: @escaping () -> Void,
+        editingIngredient: Ingredient? = nil
+    ) {
+        _ingredients = ingredients
+        self.onSave = onSave
+        self.onClose = onClose
+        self.editingIngredient = editingIngredient
+
+        _name = State(initialValue: editingIngredient?.name ?? "")
+        _quantity = State(initialValue: editingIngredient?.quantity ?? "")
+        _unit = State(initialValue: editingIngredient?.unit ?? "stk")
+        _category = State(initialValue: editingIngredient?.category ?? "Grønnsaker")
+        _expirationDate = State(initialValue: editingIngredient?.expirationDate ?? Date())
+        _notes = State(initialValue: editingIngredient?.notes ?? "")
+    }
+
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Legg til vare")
-                .font(.title3)
-                .fontWeight(.bold)
-                .foregroundColor(Color("PrimaryGreen"))
-                .fontDesign(.rounded)
-
-            VStack(alignment: .leading, spacing: 14) {
-                TextField("Navn", text: $name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+        VStack(spacing: 16) {
+            // Header
+            HStack {
+                Text(editingIngredient != nil ? "Rediger vare" : "Ny vare")
+                    .font(.title3)
+                    .fontWeight(.bold)
                     .fontDesign(.rounded)
+                    .foregroundColor(Color("PrimaryGreen"))
 
-                HStack {
-                    TextField("Mengde", text: $quantity)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                Spacer()
+
+                Button(action: onClose) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.gray)
+                }
+            }
+
+            Divider()
+
+            // Inputs
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Navn")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("DeepGreen"))
                         .fontDesign(.rounded)
+                    TextField("Navn på vare", text: $name)
+                        .textFieldStyle(.roundedBorder)
+                        .fontDesign(.rounded)
+                }
 
-                    Picker("", selection: $unit) {
-                        ForEach(units, id: \.self) { Text($0) }
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Mengde")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("DeepGreen"))
+                            .fontDesign(.rounded)
+                        TextField("f.eks. 2", text: $quantity)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.decimalPad)
+                            .fontDesign(.rounded)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Enhet")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("DeepGreen"))
+                            .fontDesign(.rounded)
+                        Picker("", selection: $unit) {
+                            ForEach(units, id: \.self) { Text($0) }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .accentColor(Color("PrimaryGreen"))
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Kategori")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("DeepGreen"))
+                        .fontDesign(.rounded)
+                    Picker("Kategori", selection: $category) {
+                        ForEach(categories, id: \.self) { Text($0) }
                     }
                     .pickerStyle(MenuPickerStyle())
                     .accentColor(Color("PrimaryGreen"))
-                    .frame(width: 80)
                 }
 
-                Picker("Kategori", selection: $category) {
-                    ForEach(categories, id: \.self) { Text($0) }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Utløpsdato")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("DeepGreen"))
+                        .fontDesign(.rounded)
+                    DatePicker("", selection: $expirationDate, displayedComponents: .date)
+                        .accentColor(Color("PrimaryGreen"))
                 }
-                .pickerStyle(MenuPickerStyle())
-                .accentColor(Color("PrimaryGreen"))
-                .fontDesign(.rounded)
 
-                DatePicker("Utløpsdato", selection: $expirationDate, displayedComponents: .date)
-                    .accentColor(Color("PrimaryGreen"))
-                    .fontDesign(.rounded)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Notater")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("DeepGreen"))
+                        .fontDesign(.rounded)
+                    TextField("F.eks. Åpnet, må brukes raskt", text: $notes)
+                        .textFieldStyle(.roundedBorder)
+                        .fontDesign(.rounded)
+                }
             }
 
-            HStack(spacing: 12) {
-                Button("Avbryt") {
-                    onClose()
-                }
-                .foregroundColor(.red)
-                .fontDesign(.rounded)
-                .padding(.horizontal)
-                .padding(.vertical, 10)
-                .frame(maxWidth: .infinity)
-                .background(Color.white.opacity(0.2))
-                .cornerRadius(10)
+            Divider()
 
-                Button("Legg til") {
-                    let trimmedName = name.trimmingCharacters(in: .whitespaces)
-                    if !trimmedName.isEmpty {
-                        let fullQuantity = quantity.isEmpty ? "1" : quantity
-                        let newItem = Ingredient(
-                            name: trimmedName,
-                            quantity: fullQuantity,
-                            unit: unit,
-                            category: category,
-                            expirationDate: expirationDate
-                        )
-                        ingredients.append(newItem)
-                        onSave()
-                        onClose()
-                    }
-                }
-                .foregroundColor(.white)
-                .fontDesign(.rounded)
-                .fontWeight(.semibold)
-                .padding(.horizontal)
-                .padding(.vertical, 10)
-                .frame(maxWidth: .infinity)
-                .background(Color("PrimaryGreen"))
-                .cornerRadius(10)
+            // Button
+            Button(action: saveIngredient) {
+                Text(editingIngredient != nil ? "Lagre endringer" : "Legg til vare")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color("PrimaryGreen"))
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                    .fontDesign(.rounded)
+                    .fontWeight(.semibold)
             }
         }
-        .padding(24)
+        .padding(20)
+        .frame(maxWidth: 500)
         .background(
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color("GreenCard"))
                 .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
         )
         .padding(.horizontal, 24)
+    }
+
+    private func saveIngredient() {
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmedName.isEmpty else { return }
+
+        let fullQuantity = quantity.isEmpty ? "1" : quantity
+
+        let newIngredient = Ingredient(
+            id: editingIngredient?.id ?? UUID(),
+            name: trimmedName,
+            quantity: fullQuantity,
+            unit: unit,
+            category: category,
+            expirationDate: expirationDate,
+            notes: notes.isEmpty ? nil : notes
+        )
+
+        if let index = ingredients.firstIndex(where: { $0.id == newIngredient.id }) {
+            ingredients[index] = newIngredient
+        } else {
+            ingredients.append(newIngredient)
+        }
+
+        onSave()
+        onClose()
     }
 }
