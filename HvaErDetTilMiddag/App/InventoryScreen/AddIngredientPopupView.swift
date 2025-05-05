@@ -20,8 +20,8 @@ struct AddIngredientPopupView: View {
     @State private var expirationDate: Date
     @State private var notes: String
 
-    let categories = ["Grønnsaker", "Frukt", "Meieri", "Kjøtt", "Fisk", "Pålegg", "Bakst", "Annet"]
-    let units = ["stk", "g", "kg", "ml", "l", "ts", "ss", "pk"]
+    let categories = ["Grønnsaker", "Frukt", "Meieri", "Kjøtt", "Ost", "Egg", "Mel", "Pasta" ,"Fisk", "Pålegg", "Bakst", "Annet"]
+    let units = ["g", "kg", "ml", "l", "ts", "ss", "pk", "stk", "glass"]
 
     init(
         ingredients: Binding<[Ingredient]>,
@@ -36,8 +36,8 @@ struct AddIngredientPopupView: View {
 
         _name = State(initialValue: editingIngredient?.name ?? "")
         _quantity = State(initialValue: editingIngredient?.quantity ?? "")
-        _unit = State(initialValue: editingIngredient?.unit ?? "stk")
-        _category = State(initialValue: editingIngredient?.category ?? "Grønnsaker")
+        _unit = State(initialValue: editingIngredient?.unit ?? "g")
+        _category = State(initialValue: editingIngredient?.category ?? "Annet")
         _expirationDate = State(initialValue: editingIngredient?.expirationDate ?? Date())
         _notes = State(initialValue: editingIngredient?.notes ?? "")
     }

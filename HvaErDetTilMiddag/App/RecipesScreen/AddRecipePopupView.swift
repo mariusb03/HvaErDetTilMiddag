@@ -5,17 +5,7 @@
 //  Created by Marius Bringsvor Rusten on 05/05/2025.
 //
 
-
 import SwiftUI
-
-struct RecipeIngredient: Identifiable, Hashable {
-    let id = UUID()
-    var name: String
-    var quantity: String
-    var unit: String
-}
-
-private let units = ["g", "kg", "dl", "l", "ts", "ss", "pk", "stk"]
 
 struct AddRecipePopupView: View {
     @State private var title: String = ""
@@ -25,13 +15,25 @@ struct AddRecipePopupView: View {
     @State private var ingredients: [RecipeIngredient] = []
     @State private var instructions: String = ""
 
+    var initialRecipe: Recipe? = nil
     var onClose: () -> Void
+    var onSave: (Recipe) -> Void
 
-    private let units = ["stk", "g", "kg", "ml", "l", "ts", "ss", "pk"]
+    private let units = ["g", "kg", "ml", "l", "ts", "ss", "pk", "stk", "glass"]
+
+    init(initialRecipe: Recipe? = nil, onClose: @escaping () -> Void, onSave: @escaping (Recipe) -> Void) {
+        self.initialRecipe = initialRecipe
+        self.onClose = onClose
+        self.onSave = onSave
+        // Must initialize _state variables here via default init pattern
+        _title = State(initialValue: initialRecipe?.title ?? "")
+        _ingredients = State(initialValue: initialRecipe?.ingredients ?? [])
+        _instructions = State(initialValue: initialRecipe?.instructions ?? "")
+    }
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("Ny Oppskrift")
+            Text(initialRecipe == nil ? "Ny Oppskrift" : "Rediger Oppskrift")
                 .font(.title3)
                 .fontWeight(.bold)
                 .foregroundColor(Color("PrimaryGreen"))
@@ -41,6 +43,7 @@ struct AddRecipePopupView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .fontDesign(.rounded)
 
+            // Ingredient Input
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
                     TextField("Ingrediens", text: $newIngredientName)
@@ -109,6 +112,7 @@ struct AddRecipePopupView: View {
                     .stroke(Color.gray.opacity(0.2), lineWidth: 1)
             )
 
+            // Instructions
             VStack(alignment: .leading, spacing: 4) {
                 Text("Fremgangsmåte")
                     .font(.caption)
@@ -123,6 +127,7 @@ struct AddRecipePopupView: View {
                     .fontDesign(.rounded)
             }
 
+            // Action Buttons
             HStack {
                 Button("Avbryt") {
                     onClose()
@@ -133,7 +138,17 @@ struct AddRecipePopupView: View {
                 Spacer()
 
                 Button("Lagre") {
-                    // TODO: Save to recipes list
+                    let trimmedTitle = title.trimmingCharacters(in: .whitespaces)
+                    guard !trimmedTitle.isEmpty else { return }
+
+                    let editedRecipe = Recipe(
+                        id: initialRecipe?.id ?? UUID(),
+                        title: trimmedTitle,
+                        ingredients: ingredients,
+                        instructions: instructions
+                    )
+
+                    onSave(editedRecipe)
                     onClose()
                 }
                 .foregroundColor(Color("PrimaryGreen"))

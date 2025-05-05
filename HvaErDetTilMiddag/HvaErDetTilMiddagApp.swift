@@ -10,6 +10,9 @@ import Firebase
 
 @main
 struct HvaErDetTilMiddagApp: App {
+    @StateObject private var inventoryModel = InventoryModel()
+    @StateObject private var shoppingModel = ShoppingModel()
+
     init() {
         FirebaseApp.configure()
     }
@@ -17,6 +20,8 @@ struct HvaErDetTilMiddagApp: App {
     var body: some Scene {
         WindowGroup {
             AppView()
+                .environmentObject(inventoryModel)
+                .environmentObject(shoppingModel)
         }
     }
 }

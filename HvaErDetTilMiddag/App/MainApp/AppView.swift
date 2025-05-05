@@ -12,7 +12,9 @@ enum Tab: Int {
 }
 
 struct AppView: View {
+    @EnvironmentObject var inventoryModel: InventoryModel
     @State private var selectedTab: Tab = .inventory
+    @State private var recipes: [Recipe] = []
 
     init() {
         // Set global UITabBar appearance (optional)
@@ -71,4 +73,6 @@ struct AppView: View {
 
 #Preview {
     AppView()
+        .environmentObject(InventoryModel())
+        .environmentObject(ShoppingModel())
 }

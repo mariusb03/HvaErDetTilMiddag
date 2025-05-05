@@ -28,8 +28,9 @@ struct Ingredient: Identifiable, Hashable, Codable {
 }
 
 struct InventoryView: View {
+    @EnvironmentObject var inventoryModel: InventoryModel
     @Namespace private var popupAnimation
-    @State private var ingredients: [Ingredient] = []
+
     @State private var searchText = ""
     @State private var showAddPopup = false
     @State private var showExpiringSoonOnly = false
@@ -37,15 +38,6 @@ struct InventoryView: View {
     @State private var selectedCategory: String? = nil
     @State private var sortByExpiration = true
     @State private var ingredientBeingEdited: Ingredient? = nil
-
-    private let storageKey = "storedIngredients"
-
-    init() {
-        if let data = UserDefaults.standard.data(forKey: storageKey),
-           let decoded = try? JSONDecoder().decode([Ingredient].self, from: data) {
-            _ingredients = State(initialValue: decoded)
-        }
-    }
 
     var body: some View {
         NavigationView {
@@ -62,7 +54,7 @@ struct InventoryView: View {
     // MARK: - Main Content
     private var mainContent: some View {
         VStack {
-            if ingredients.isEmpty {
+            if inventoryModel.ingredients.isEmpty {
                 emptyStateView
             } else {
                 ingredientListView
@@ -84,7 +76,7 @@ struct InventoryView: View {
 
     // MARK: - Toolbar
     private var navigationToolbar: some ToolbarContent {
-        return Group {
+        Group {
             ToolbarItem(placement: .navigationBarLeading) {
                 Text("Mine varer")
                     .font(.title2)
@@ -117,8 +109,8 @@ struct InventoryView: View {
                         .transition(.opacity)
 
                     AddIngredientPopupView(
-                        ingredients: $ingredients,
-                        onSave: saveIngredients,
+                        ingredients: $inventoryModel.ingredients,
+                        onSave: inventoryModel.saveIngredients,
                         onClose: {
                             withAnimation(.easeOut(duration: 0.25)) {
                                 showAddPopup = false
@@ -276,7 +268,7 @@ struct InventoryView: View {
     // MARK: - Bottom Add Button
     private var bottomBar: some View {
         VStack(spacing: 8) {
-            Text("I dine skap: \(ingredients.count) varer")
+            Text("I dine skap: \(inventoryModel.ingredients.count) varer")
                 .font(.footnote)
                 .foregroundColor(.gray)
                 .fontDesign(.rounded)
@@ -312,7 +304,7 @@ struct InventoryView: View {
     }()
 
     private var filteredIngredients: [Ingredient] {
-        var filtered = ingredients
+        var filtered = inventoryModel.ingredients
 
         if !searchText.isEmpty {
             filtered = filtered.filter {
@@ -340,15 +332,9 @@ struct InventoryView: View {
         return filtered
     }
 
-    private func saveIngredients() {
-        if let data = try? JSONEncoder().encode(ingredients) {
-            UserDefaults.standard.set(data, forKey: storageKey)
-        }
-    }
-
     private func deleteItem(_ item: Ingredient) {
-        ingredients.removeAll { $0.id == item.id }
-        saveIngredients()
+        inventoryModel.ingredients.removeAll { $0.id == item.id }
+        inventoryModel.saveIngredients()
     }
 
     private func emojiForCategory(_ category: String) -> String {
@@ -362,10 +348,14 @@ struct InventoryView: View {
         if lower.contains("kjøtt") { return "🥩" }
         if lower.contains("fisk") { return "🐟" }
         if lower.contains("pålegg") { return "🥪" }
+        if lower.contains("mel") { return "🌾" }
+        if lower.contains("pasta") { return "🍝" }
+        if lower.contains("") { return "" }
         return "🍴"
     }
 }
 
 #Preview {
     InventoryView()
+        .environmentObject(InventoryModel()) // ✅ create an instance here
 }
